@@ -28,7 +28,7 @@ import EditProfile from './pages/patient/EditProfile';
 import Profile from './pages/patient/profile';
 import AddDoctor from './pages/patient/AddDoctor';
 import Doctors from './pages/patient/doctors';
-import PatientSettings from './pages/patient/settings';
+import PatientSettings from './pages/patient/Settings';
 import EditDoctor from './pages/patient/EditDoctor';
 import DoctorDetail from './pages/patient/DoctorDetail';
 import KnowMore from './pages/patient/know-more/KnowMore';
