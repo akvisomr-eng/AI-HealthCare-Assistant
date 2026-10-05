@@ -51,7 +51,7 @@ import DoctorProfile from './pages/doctor/profile';
 import Doctor from './pages/doctor';
 import DoctorPatients from './pages/doctor/patients';
 import DoctorAppointements from './pages/doctor/Appointments';
-import DoctorSettings from './pages/doctor/settings';
+import DoctorSettings from './pages/doctor/Settings';
 import Calendar from './pages/doctor/calendar';
 import UpdateAppointment from './pages/doctor/updateAppointment';
 import TakeAppointment from './pages/patient/TakeAppointment';
