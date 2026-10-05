@@ -1,0 +1,57 @@
+name: Import upstream source
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Import upstream repository
+        run: |
+          rm -rf /tmp/upstream
+          git clone --depth 1 https://github.com/ahlem-phantom/AI-HealthCare-Assistant.git /tmp/upstream
+          find /tmp/upstream -mindepth 1 -maxdepth 1 ! -name .git -exec cp -a {} . \;
+          # Remove credentials accidentally committed in the upstream project.
+          rm -f server/app/Appointment_chatbot/pi-twin-chatbot-xiyt-ed65fedbf656.json
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("server/app/routes/payment.routes.js")
+          if p.exists():
+              s = p.read_text()
+              s = re.sub(r"sk_test_[A-Za-z0-9]+", "${STRIPE_SECRET_KEY}", s)
+              s = s.replace("'${STRIPE_SECRET_KEY}'", "process.env.STRIPE_SECRET_KEY")
+              p.write_text(s)
+          p = Path("server/app/routes/oauth.routes.js")
+          if p.exists():
+              s = p.read_text()
+              s = re.sub(r"client_secret=[^`]+", "client_secret=${LINKEDIN_CLIENT_SECRET}", s)
+              p.write_text(s)
+          PY
+          rm -rf .git
+
+      - name: Commit imported source
+        run: |
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to import"
+            exit 0
+          fi
+          git commit -m "chore: import AI Healthcare Assistant source"
+          git branch -M main
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git push --force origin main
