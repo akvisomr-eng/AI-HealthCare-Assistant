@@ -36,7 +36,7 @@ jobs:
         working-directory: react-app
         run: npm test -- --watchAll=false --runInBand healthKnowledge.test.js
 
-      - name: Build
+      - name: Build SehatKita
         working-directory: react-app
         env:
           PUBLIC_URL: "/AI-HealthCare-Assistant"
@@ -46,6 +46,20 @@ jobs:
           REACT_APP_GOOGLE_MAPS_API_KEY: ""
           REACT_APP_ALAN_AI_KEY: ""
         run: npm run build
+
+      - name: Build Admin Center
+        working-directory: admin-app
+        env:
+          PUBLIC_URL: "/AI-HealthCare-Assistant/admin"
+        run: npm install --no-audit --no-fund && npm run build
+
+      - name: Gabungkan aplikasi admin terpisah
+        run: |
+          rm -rf react-app/build/admin
+          mkdir -p react-app/build/admin
+          cp -R admin-app/build/. react-app/build/admin/
+          test -f react-app/build/admin/index.html
+          grep -q "/AI-HealthCare-Assistant/admin/static/" react-app/build/admin/index.html
 
       - name: Validasi hasil build
         working-directory: react-app
