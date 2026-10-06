@@ -19,9 +19,10 @@ test("RME membuka workflow Encounter dan dapat kembali", async () => {
   fireEvent.click(await screen.findByRole("button",{name:/RME/}));
   expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
   const encounterCard=screen.getByText("Encounter").closest("section");
+  expect(encounterCard).toBeTruthy();
   fireEvent.click(encounterCard.querySelector("button"));
   expect(screen.getByText("Ruang kerja modul")).toBeInTheDocument();
-  expect(screen.getByText("Encounter")).toBeInTheDocument();
+  expect(screen.getAllByText("Encounter").length).toBeGreaterThan(0);
   fireEvent.click(screen.getByRole("button",{name:/Kembali ke Rekam Medis Elektronik/}));
   expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
 });
