@@ -138,6 +138,26 @@ async function request(path,options={}){
     const {data,error}=await supabase.from("purchase_orders").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
     if(error) throw error; return {data};
   }
+  if(path==="/api/admin/vendor-invoices" && !options.method){
+    const {data,error}=await supabase.from("vendor_invoices").select("*,suppliers(name,supplier_code),purchase_orders(order_number),goods_receipts(receipt_number)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
+    if(error) throw error; return {data:(data||[]).map(x=>({...x,supplier_name:x.suppliers?.name||"—",supplier_code:x.suppliers?.supplier_code||"—",order_number:x.purchase_orders?.order_number||"—",receipt_number:x.goods_receipts?.receipt_number||"—"}))};
+  }
+  if(path==="/api/admin/vendor-invoices" && options.method==="POST"){
+    const user=(await supabase.auth.getUser()).data.user;
+    const {data,error}=await supabase.from("vendor_invoices").insert({organization_id:organizationId,supplier_id:body.supplierId||null,purchase_order_id:body.purchaseOrderId||null,goods_receipt_id:body.goodsReceiptId||null,invoice_number:body.invoiceNumber,invoice_date:body.invoiceDate||new Date().toISOString().slice(0,10),due_date:body.dueDate||null,status:body.status||"received",subtotal:Number(body.subtotal)||0,tax_amount:Number(body.taxAmount)||0,total_amount:Number(body.totalAmount)||0,notes:body.notes||null,created_by:user?.id||null}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/vendor-invoices/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.status!==undefined) patch.status=body.status;
+    if(body.dueDate!==undefined) patch.due_date=body.dueDate||null;
+    if(body.subtotal!==undefined) patch.subtotal=Number(body.subtotal)||0;
+    if(body.taxAmount!==undefined) patch.tax_amount=Number(body.taxAmount)||0;
+    if(body.totalAmount!==undefined) patch.total_amount=Number(body.totalAmount)||0;
+    if(body.notes!==undefined) patch.notes=body.notes||null;
+    const {data,error}=await supabase.from("vendor_invoices").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
   if(path==="/api/admin/goods-receipts" && !options.method){
     const {data,error}=await supabase.from("goods_receipts").select("*,purchase_orders(order_number),suppliers(name)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
     if(error) throw error; return {data:(data||[]).map(x=>({...x,order_number:x.purchase_orders?.order_number||"—",supplier_name:x.suppliers?.name||"—"}))};
