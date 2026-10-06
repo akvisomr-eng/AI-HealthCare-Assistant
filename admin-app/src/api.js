@@ -26,6 +26,12 @@ async function request(path,options={}){
     return {data:(data||[]).map(x=>({...x,patient_name:x.patients?.full_name||"Pasien",medical_record_number:x.patients?.medical_record_number||""}))};
   }
   const body=options.body?JSON.parse(options.body):{};
+  if(path.startsWith("/api/admin/encounters/") && options.method==="PATCH"){
+    const id=path.split("/").pop();
+    const {data,error}=await supabase.from("encounters").update({subjective:body.subjective||null,objective:body.objective||null,assessment:body.assessment||null,plan:body.plan||null}).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error;
+    return {data};
+  }
   if(path==="/api/admin/patients" && options.method==="POST"){
     const {data,error}=await supabase.from("patients").insert({
       organization_id:organizationId,
@@ -72,3 +78,4 @@ async function request(path,options={}){
 
 export const apiGet=path=>request(path);
 export const apiPost=(path,body)=>request(path,{method:"POST",body:JSON.stringify(body)});
+export const apiPatch=(path,body)=>request(path,{method:"PATCH",body:JSON.stringify(body)});
