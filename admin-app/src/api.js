@@ -42,6 +42,30 @@ async function request(path,options={}){
     const [table,column]=simpleGets[path];
     const {data,error}=await supabase.from(table).select("*").eq("organization_id",organizationId).order(column,{ascending:false}); if(error)throw error; return {data};
   }
+  if(path==="/api/admin/inventory-items" && !options.method){
+    const {data,error}=await supabase.from("inventory_items").select("*").eq("organization_id",organizationId).order("name",{ascending:true}); if(error)throw error; return {data:data||[]};
+  }
+  if(path==="/api/admin/inventory-movements" && !options.method){
+    const {data,error}=await supabase.from("inventory_movements").select("*,inventory_items(name,sku,unit)").eq("organization_id",organizationId).order("created_at",{ascending:false}); if(error)throw error; return {data:data||[]};
+  }
+  if(path==="/api/admin/inventory-items" && options.method==="POST"){
+    const {data,error}=await supabase.from("inventory_items").insert({organization_id:organizationId,sku:body.sku,name:body.name,category:body.category||null,unit:body.unit||"unit",quantity:Number(body.quantity)||0,minimum_stock:Number(body.minimumStock)||0,unit_cost:Number(body.unitCost)||0,expiry_date:body.expiryDate||null,batch_number:body.batchNumber||null,location:body.location||null}).select().single(); if(error)throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/inventory-items/") && options.method==="PATCH"){
+    const id=path.split("/").pop();
+    const patch={}; if(body.quantity!==undefined)patch.quantity=Number(body.quantity)||0; if(body.minimumStock!==undefined)patch.minimum_stock=Number(body.minimumStock)||0; if(body.location!==undefined)patch.location=body.location||null; if(body.expiryDate!==undefined)patch.expiry_date=body.expiryDate||null; if(body.batchNumber!==undefined)patch.batch_number=body.batchNumber||null;
+    const {data,error}=await supabase.from("inventory_items").update(patch).eq("id",id).eq("organization_id",organizationId).select().single(); if(error)throw error; return {data};
+  }
+  if(path==="/api/admin/inventory-movements" && options.method==="POST"){
+    const qty=Number(body.quantity); if(!Number.isFinite(qty)||qty===0)throw new Error("Jumlah mutasi tidak valid.");
+    const {data:item,error:itemError}=await supabase.from("inventory_items").select("quantity").eq("id",body.inventoryItemId).eq("organization_id",organizationId).single(); if(itemError)throw itemError;
+    const delta=body.movementType==="outbound"?-Math.abs(qty):Math.abs(qty);
+    if(body.movementType==="adjustment"||body.movementType==="transfer") { }
+    const next=Number(item.quantity)+delta; if(next<0)throw new Error("Stok tidak mencukupi.");
+    const {data,error}=await supabase.from("inventory_movements").insert({organization_id:organizationId,inventory_item_id:body.inventoryItemId,movement_type:body.movementType||"adjustment",quantity:qty,reference:body.reference||null,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single(); if(error)throw error;
+    const {data:updated,error:updateError}=await supabase.from("inventory_items").update({quantity:next}).eq("id",body.inventoryItemId).eq("organization_id",organizationId).select().single(); if(updateError)throw updateError;
+    return {data, item:updated};
+  }
   if(path==="/api/admin/rme-history" && !options.method){
     const {data,error}=await supabase.from("encounters").select("id,patient_id,clinician_name,started_at,status,subjective,objective,assessment,plan,patients(full_name,medical_record_number)").eq("organization_id",organizationId).order("started_at",{ascending:false}); if(error)throw error;
     return {data:(data||[]).map(x=>({...x,patient_name:x.patients?.full_name||"Pasien",medical_record_number:x.patients?.medical_record_number||""}))};
