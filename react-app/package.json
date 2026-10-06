@@ -1,5 +1,5 @@
 {
-  "name": "react-app",
+  "name": "ai-healthcare-assistant",
   "version": "0.1.0",
   "private": true,
   "homepage": "https://akvisomr-eng.github.io/AI-HealthCare-Assistant",
@@ -45,8 +45,34 @@
     "sweetalert2": "^11.4.13",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {"start":"react-scripts start","build":"react-scripts build","test":"react-scripts test","eject":"react-scripts eject"},
-  "eslintConfig":{"extends":["react-app","react-app/jest"]},
-  "browserslist":{"production":[">0.2%","not dead","not op_mini all"],"development":["last 1 chrome version","last 1 firefox version","last 1 safari version"]},
-  "devDependencies":{"autoprefixer":"^10.4.27","postcss":"^8.5.8","tailwindcss":"^3.4.17"}
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.17"
+  },
+  "description": "Aplikasi pendamping kesehatan digital orisinal berbahasa Indonesia."
 }
