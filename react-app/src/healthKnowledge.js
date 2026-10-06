@@ -136,3 +136,14 @@ export const analisisKeluhan = (nilai) => {
     literasi: PENGETAHUAN_KESEHATAN.tindakanUmum[kode]
   };
 };
+
+export const pertanyaanAdaptif = (hasil) => {
+  if (!hasil) return [];
+  const pertanyaan = [];
+  if (!hasil.adaDurasi) pertanyaan.push("Sejak kapan keluhan ini mulai dirasakan?");
+  if (!hasil.faktorPerhatian.includes("keluhan makin berat")) pertanyaan.push("Apakah keluhan semakin berat, tetap, atau mulai membaik?");
+  if (hasil.gejala.length > 0 && hasil.gejala.length < 2) pertanyaan.push("Apakah ada keluhan lain yang muncul bersamaan?");
+  if (hasil.kode === "SEGERA" || hasil.kode === "DARURAT") pertanyaan.push("Seberapa berat keluhannya saat ini, dan apakah mengganggu bernapas, kesadaran, atau aktivitas utama?");
+  if (hasil.kode === "KONSULTASI") pertanyaan.push("Apakah keluhan pernah terjadi sebelumnya atau sering kambuh?");
+  return [...new Set(pertanyaan)].slice(0, 4);
+};
