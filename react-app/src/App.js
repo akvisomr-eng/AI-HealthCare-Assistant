@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "./index.css";
-import { analisisKeluhan } from "./healthKnowledge";
+import { analisisKeluhan, pertanyaanAdaptif } from "./healthKnowledge";
 
 function App() {
   const [tab, setTab] = useState("beranda");
@@ -48,7 +48,7 @@ function App() {
             <p>Masukkan gejala secara singkat. Sistem ini hanya memberikan panduan awal dan bukan diagnosis medis.</p>
             <textarea value={keluhan} onChange={e => setKeluhan(e.target.value)} placeholder="Contoh: sejak kemarin saya demam dan batuk..." />
             <button type="button" className="primary large" onClick={() => setHasil(saran)}>Analisis Panduan</button>
-            {hasil && <div className={"result " + hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p>{hasil.gejala?.length > 0 && <p><strong>Keluhan terdeteksi:</strong> {hasil.gejala.join(", ")}.</p>}{hasil.faktorPerhatian?.length > 0 && <p><strong>Hal yang perlu diperhatikan:</strong> {hasil.faktorPerhatian.join(", ")}.</p>}<div className="action-guide"><strong>Panduan tindakan</strong><ul>{hasil.literasi?.map(item => <li key={item}>{item}</li>)}</ul></div><small>SehatKita adalah alat informasi awal, bukan alat diagnosis. Bila kondisi mengancam nyawa, jangan menunggu hasil aplikasi; hubungi PSC 119 atau layanan darurat setempat.</small></div>}
+            {hasil && <div className={"result " + hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p>{hasil.gejala?.length > 0 && <p><strong>Keluhan terdeteksi:</strong> {hasil.gejala.join(", ")}.</p>}{hasil.faktorPerhatian?.length > 0 && <p><strong>Hal yang perlu diperhatikan:</strong> {hasil.faktorPerhatian.join(", ")}.</p>}<div className="action-guide"><strong>Panduan tindakan</strong><ul>{hasil.literasi?.map(item => <li key={item}>{item}</li>)}</ul></div><div className="follow-up"><strong>Pertanyaan lanjutan</strong><ul>{pertanyaanAdaptif(hasil).map(item => <li key={item}>{item}</li>)}</ul></div><small>SehatKita adalah alat informasi awal, bukan alat diagnosis. Bila kondisi mengancam nyawa, jangan menunggu hasil aplikasi; hubungi PSC 119 atau layanan darurat setempat.</small></div>}
             <button type="button" className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
           </section>
         </main>
