@@ -36,3 +36,15 @@ test("Admin Center dapat membuka formulir pasien", async () => {
   fireEvent.click(await screen.findByText("+ Pasien Baru"));
   expect(screen.getByText("Tambah Pasien")).toBeInTheDocument();
 });
+
+
+test("Workspace modul ditutup saat berpindah ke modul bisnis", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/RME/}));
+  const encounterCard=screen.getByText("Encounter").closest("section");
+  fireEvent.click(encounterCard.querySelector("button"));
+  expect(screen.getByText("Ruang kerja modul")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/HRD/}));
+  expect(screen.getByText("HRD")).toBeInTheDocument();
+  expect(screen.queryByText("Ruang kerja modul")).not.toBeInTheDocument();
+});
