@@ -1,62 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "./index.css";
-
-import { analisisKeluhan } from "./healthKnowledge";\n\nimport React, { useMemo, useState } from "react";
-import "./index.css";
-
-const kelompokGejala = [
-  { nama: "demam", pola: ["demam", "badan panas", "badan terasa panas", "suhu tubuh naik", "suhu badan naik", "panas tinggi"] },
-  { nama: "batuk", pola: ["batuk", "batuk-batuk", "batuk batuk"] },
-  { nama: "sesak", pola: ["sesak", "sulit bernapas", "susah bernapas", "sulit bernafas", "susah bernafas", "napas terasa berat", "nafas terasa berat", "napas berat", "nafas berat"] },
-  { nama: "nyeri dada", pola: ["nyeri dada", "sakit dada", "dada sakit", "dada terasa sakit", "dada terasa ditekan", "tekanan di dada"] },
-  { nama: "sakit kepala", pola: ["sakit kepala", "kepala sakit", "kepala terasa sakit", "pusing di kepala"] },
-  { nama: "mual", pola: ["mual", "ingin muntah", "rasa mual"] },
-  { nama: "muntah", pola: ["muntah", "muntah-muntah", "muntah muntah"] },
-  { nama: "diare", pola: ["diare", "mencret", "buang air besar cair", "bab cair", "berak cair"] },
-  { nama: "pusing", pola: ["pusing", "kepala berkunang", "berkunang-kunang", "berkunang kunang", "terasa berputar"] },
-  { nama: "lemas", pola: ["lemas", "badan lemas", "tidak bertenaga", "kurang tenaga", "badan terasa lemah"] }
-];
-
-const tandaBahaya = [
-  "sesak berat", "sangat sulit bernapas", "tidak bisa bernapas", "napas sangat berat",
-  "nafas sangat berat", "nyeri dada hebat", "sakit dada hebat", "dada terasa sangat tertekan",
-  "pingsan", "hilang kesadaran", "tidak sadarkan diri", "kejang", "perdarahan hebat",
-  "darah keluar banyak", "pendarahan hebat"
-];
-
-const normalisasi = (nilai) => nilai
-  .toLowerCase()
-  .replace(/[.,!?;:()]/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
-
-const analisisKeluhan = (nilai) => {
-  const teks = normalisasi(nilai);
-  if (!teks) return null;
-
-  const darurat = tandaBahaya.some(frasa => teks.includes(frasa));
-  const cocok = kelompokGejala
-    .filter(kelompok => kelompok.pola.some(frasa => teks.includes(frasa)))
-    .map(kelompok => kelompok.nama);
-
-  if (darurat) {
-    return {
-      level: "Darurat",
-      warna: "merah",
-      teks: "Keluhan yang Anda masukkan memiliki tanda bahaya yang dapat memerlukan pertolongan segera. Hubungi layanan darurat setempat atau pergi ke fasilitas kesehatan terdekat.",
-      gejala: cocok
-    };
-  }
-
-  return {
-    level: cocok.length >= 2 ? "Perlu diperiksa" : "Pantau dan konsultasikan",
-    warna: cocok.length >= 2 ? "kuning" : "hijau",
-    teks: cocok.length >= 2
-      ? "Beberapa keluhan terdeteksi. Pertimbangkan berkonsultasi dengan tenaga kesehatan, terutama bila keluhan memburuk atau menetap."
-      : "Informasi belum cukup untuk menilai keluhan. Pantau kondisi dan konsultasikan dengan tenaga kesehatan bila Anda khawatir.",
-    gejala: cocok
-  };
-};
+import { analisisKeluhan } from "./healthKnowledge";
 
 function App() {
   const [tab, setTab] = useState("beranda");
