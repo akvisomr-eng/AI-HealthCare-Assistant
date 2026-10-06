@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import App from "./App";
 
-jest.mock("./api",()=>({isApiConfigured:()=>false,apiGet:jest.fn(),apiPost:jest.fn()}));
+jest.mock("./api",()=>({isApiConfigured:()=>false,apiGet:jest.fn(),apiPost:jest.fn(),apiPatch:jest.fn()}));
 jest.mock("./supabase",()=>({supabase:{auth:{getSession:()=>Promise.resolve({data:{session:{user:{id:"test-user"}}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe:()=>{}}}}),signOut:jest.fn().mockResolvedValue({})}},getMyOrganization:jest.fn()}));
 
 test("Admin Center menampilkan modul klinik", async () => {
@@ -65,4 +65,18 @@ test("RME membuka workflow SOAP", async () => {
   expect(screen.getByRole("heading",{name:"SOAP",level:2})).toBeInTheDocument();
   expect(screen.getByText("Belum ada encounter")).toBeInTheDocument();
   expect(screen.getByRole("button",{name:/Buat Encounter/})).toBeInTheDocument();
+});
+
+
+test("Farmasi membuka antrean Resep Masuk tanpa placeholder integrasi", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Farmasi/}));
+  const heading=screen.getAllByRole("heading",{name:"Resep Masuk",level:3})[0];
+  const card=heading.closest("section");
+  expect(card).toBeTruthy();
+  fireEvent.click(card.querySelector("button"));
+  expect(screen.getByRole("heading",{name:"Resep Masuk",level:2})).toBeInTheDocument();
+  expect(screen.getByText("Belum ada resep masuk")).toBeInTheDocument();
+  expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
+  expect(screen.getByText("Menunggu verifikasi")).toBeInTheDocument();
 });
