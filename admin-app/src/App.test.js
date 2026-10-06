@@ -155,3 +155,16 @@ test("Keuangan membuka Chart of Accounts, Jurnal Umum, dan Kas & Bank tanpa plac
     fireEvent.click(screen.getByRole("button",{name:/Kembali ke Keuangan/}));
   }
 });
+
+test("Keuangan membuka Piutang, Hutang, dan Laba Rugi dari data Supabase tanpa placeholder", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Keuangan/}));
+  for (const title of ["Piutang","Hutang","Laba Rugi"]) {
+    const heading=screen.getAllByRole("heading",{name:title,level:3})[0];
+    fireEvent.click(heading.closest("section").querySelector("button"));
+    expect(screen.getByRole("heading",{name:title,level:2})).toBeInTheDocument();
+    expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Supabase/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:/Kembali ke Keuangan/}));
+  }
+});
