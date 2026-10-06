@@ -54,3 +54,15 @@ test("Workspace modul ditutup saat berpindah ke modul bisnis", async () => {
   expect(screen.getByRole("heading",{name:"HRD",level:1})).toBeInTheDocument();
   expect(screen.queryByText("Ruang kerja modul")).not.toBeInTheDocument();
 });
+
+test("RME membuka workflow SOAP", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/RME/}));
+  const soapHeading=screen.getAllByRole("heading",{name:"SOAP",level:3})[0];
+  const soapCard=soapHeading.closest("section");
+  expect(soapCard).toBeTruthy();
+  fireEvent.click(soapCard.querySelector("button"));
+  expect(screen.getByRole("heading",{name:"SOAP",level:2})).toBeInTheDocument();
+  expect(screen.getByText("Belum ada encounter")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:/Buat Encounter/})).toBeInTheDocument();
+});
