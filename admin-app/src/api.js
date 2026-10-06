@@ -100,6 +100,24 @@ async function request(path,options={}){
     const {data,error}=await supabase.from("module_work_items").insert({organization_id:organizationId,module_key:body.moduleKey,title:body.title,reference:body.reference||null,status:body.status||"draft",amount:body.amount||null,due_date:body.dueDate||null,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
     if(error)throw error; return {data};
   }
+  if(path==="/api/admin/purchase-requests" && !options.method){
+    const {data,error}=await supabase.from("purchase_requests").select("*").eq("organization_id",organizationId).order("updated_at",{ascending:false});
+    if(error) throw error; return {data:data||[]};
+  }
+  if(path==="/api/admin/purchase-requests" && options.method==="POST"){
+    const {data,error}=await supabase.from("purchase_requests").insert({organization_id:organizationId,request_number:body.requestNumber,title:body.title,description:body.description||null,supplier_name:body.supplierName||null,total_amount:Number(body.totalAmount)||0,branch_id:body.branchId||null,requested_by:body.requestedBy||null}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/purchase-requests/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.status!==undefined) patch.status=body.status;
+    if(body.supplierName!==undefined) patch.supplier_name=body.supplierName||null;
+    if(body.totalAmount!==undefined) patch.total_amount=Number(body.totalAmount)||0;
+    if(body.description!==undefined) patch.description=body.description||null;
+    if(body.status==="approved") patch.approved_at=new Date().toISOString();
+    const {data,error}=await supabase.from("purchase_requests").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
   if(path.startsWith("/api/admin/work-items/") && options.method==="PATCH"){
     const id=path.split("/").pop();
     const patch={}; if(body.status!==undefined) patch.status=body.status; if(body.title!==undefined) patch.title=body.title; if(body.reference!==undefined) patch.reference=body.reference||null; if(body.amount!==undefined) patch.amount=body.amount||null; if(body.dueDate!==undefined) patch.due_date=body.dueDate||null; if(body.notes!==undefined) patch.notes=body.notes||null; const {data,error}=await supabase.from("module_work_items").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
