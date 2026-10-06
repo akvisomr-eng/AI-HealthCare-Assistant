@@ -36,7 +36,7 @@ jobs:
         working-directory: react-app
         run: npm test -- --watchAll=false --runInBand healthKnowledge.test.js
 
-      - name: Build SehatKita
+      - name: Uji backend API\n        working-directory: backend\n        run: npm test\n\n      - name: Build SehatKita
         working-directory: react-app
         env:
           PUBLIC_URL: "/AI-HealthCare-Assistant"
