@@ -46,11 +46,46 @@ function App() {
           <button type="button" onClick={() => buka("janji")}>Janji Temu</button>
           <button type="button" onClick={() => buka("catatan")}>Catatan</button>
           <button type="button" onClick={() => menujuBagian("tentang")}>Tentang</button>
+          <button type="button" className={tab === "admin" ? "active" : ""} onClick={() => buka("admin")}>Admin</button>
         </nav>
         <button type="button" className="header-action" onClick={() => buka("cek")}>Mulai Sekarang →</button>
       </header>
 
-      {tab === "janji" ? (
+      {tab === "admin" ? (
+        <main className="admin-shell">
+          <aside className="admin-sidebar">
+            <div className="admin-brand"><span className="logo-mark">✚</span><div><b>SehatKita</b><small>Admin Center</small></div></div>
+            <div className="admin-nav-title">UTAMA</div>
+            <button className="admin-nav active">⌂ <span>Dashboard</span></button>
+            <button className="admin-nav">◫ <span>Janji Temu</span><em>12</em></button>
+            <button className="admin-nav">▣ <span>Catatan</span></button>
+            <button className="admin-nav">◌ <span>Pengguna</span></button>
+            <div className="admin-nav-title">SISTEM</div>
+            <button className="admin-nav">⚙ <span>Pengaturan</span></button>
+            <button className="admin-nav">◈ <span>Audit & Keamanan</span></button>
+            <div className="admin-side-note"><b>Mode Demo</b><p>Data dashboard adalah data ilustrasi. Belum terhubung ke data pasien nyata.</p></div>
+            <button className="admin-back" onClick={() => buka("beranda")}>← Kembali ke aplikasi</button>
+          </aside>
+          <section className="admin-content">
+            <div className="admin-topbar"><div><span className="eyebrow">PUSAT KONTROL</span><h1>Dashboard Admin</h1><p>Pantau aktivitas SehatKita dari satu tempat.</p></div><div className="admin-profile"><span className="online-dot"></span><div><b>Administrator</b><small>Pengelola sistem</small></div><span className="avatar">A</span></div></div>
+            <div className="admin-banner"><div><b>Semua sistem berjalan normal</b><p>Mesin triase, antarmuka pengguna, dan deployment terakhir berada dalam kondisi baik.</p></div><span>✓ Operasional</span></div>
+            <div className="kpi-grid">
+              <article className="kpi"><div className="kpi-icon blue">◉</div><div><span>Total pengguna</span><strong>1.284</strong><small>↑ 12,8% bulan ini</small></div></article>
+              <article className="kpi"><div className="kpi-icon green">◷</div><div><span>Janji temu</span><strong>186</strong><small>↑ 8,4% minggu ini</small></div></article>
+              <article className="kpi"><div className="kpi-icon purple">⌕</div><div><span>Cek keluhan</span><strong>2.846</strong><small>↑ 16,2% bulan ini</small></div></article>
+              <article className="kpi"><div className="kpi-icon orange">!</div><div><span>Perlu perhatian</span><strong>23</strong><small>Prioritas ditinjau</small></div></article>
+            </div>
+            <div className="admin-grid-main">
+              <article className="admin-panel chart-panel"><div className="panel-head"><div><h2>Aktivitas layanan</h2><p>Interaksi pengguna dalam 7 hari terakhir</p></div><button>7 hari ▾</button></div><div className="chart"><div className="chart-y"><span>500</span><span>400</span><span>300</span><span>200</span><span>100</span><span>0</span></div><div className="bars">{[62,48,72,55,88,76,94].map((v,i)=><div className="bar-col" key={i}><div className="bar" style={{height:v+"%"}}><span>{[312,241,364,279,442,381,476][i]}</span></div><small>{["Sen","Sel","Rab","Kam","Jum","Sab","Min"][i]}</small></div>)}</div></div></article>
+              <article className="admin-panel"><div className="panel-head"><div><h2>Distribusi triase</h2><p>Hasil panduan kesehatan</p></div><button>Detail</button></div><div className="triage-ring"><div><strong>2.846</strong><span>analisis</span></div></div><div className="legend"><p><i className="dot green-dot"></i>Pantau <b>58%</b></p><p><i className="dot yellow-dot"></i>Konsultasi <b>31%</b></p><p><i className="dot red-dot"></i>Segera/Darurat <b>11%</b></p></div></article>
+            </div>
+            <div className="admin-grid-bottom">
+              <article className="admin-panel"><div className="panel-head"><div><h2>Janji temu terbaru</h2><p>Aktivitas konsultasi terjadwal</p></div><button>Lihat semua →</button></div><div className="appointment-list">{[["08:30","Dokter Umum","Konsultasi keluhan"],["10:00","Klinik Sehat Kita","Kontrol lanjutan"],["13:30","Dokter Spesialis","Evaluasi kondisi"],["15:00","Klinik Sehat Kita","Konsultasi umum"]].map((x,i)=><div className="appointment-row" key={i}><b>{x[0]}</b><span className="appt-icon">✚</span><div><strong>{x[1]}</strong><small>{x[2]}</small></div><em>{i<2?"Terjadwal":"Menunggu"}</em></div>)}</div></article>
+              <article className="admin-panel"><div className="panel-head"><div><h2>Status platform</h2><p>Pemeriksaan komponen utama</p></div></div><div className="health-status"><p><span>Mesin triase</span><b>● Aktif</b></p><p><span>GitHub Pages</span><b>● Aktif</b></p><p><span>API backend</span><b className="muted-status">○ Belum terhubung</b></p><p><span>Penyimpanan aman</span><b className="muted-status">○ Dalam pengembangan</b></p></div><div className="security-score"><div><span>Keamanan demo</span><strong>78%</strong></div><div className="score-track"><i></i></div><small>Tambahkan autentikasi dan backend sebelum mengelola data kesehatan nyata.</small></div></article>
+            </div>
+          </section>
+        </main>
+      ) : tab === "janji" ? (
         <main className="feature-page"><section className="feature-card">
           <span className="eyebrow">PERENCANAAN KONSULTASI</span><h1>Janji Temu</h1>
           <p>Siapkan rencana konsultasi dan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p>
