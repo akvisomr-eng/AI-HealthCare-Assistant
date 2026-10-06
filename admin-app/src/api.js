@@ -28,6 +28,16 @@ async function request(path,options={}){
     "/api/admin/prescriptions":["prescriptions","created_at"],
     "/api/admin/referrals":["referrals","created_at"]
   };
+  if(path==="/api/admin/prescriptions" && !options.method){
+    const {data,error}=await supabase.from("prescriptions").select("*,encounters(clinician_name,started_at,patients(full_name,medical_record_number))").eq("organization_id",organizationId).order("created_at",{ascending:false}); if(error)throw error;
+    return {data:(data||[]).map(x=>({...x,patient_name:x.encounters?.patients?.full_name||"Pasien",medical_record_number:x.encounters?.patients?.medical_record_number||"",clinician_name:x.encounters?.clinician_name||"",encounter_started_at:x.encounters?.started_at||null}))};
+  }
+  if(path.startsWith("/api/admin/prescriptions/") && options.method==="PATCH"){
+    const id=path.split("/").pop();
+    const allowed=["draft","verified","rejected","dispensing","dispensed","cancelled"];
+    if(!allowed.includes(body.status)) throw new Error("Status resep tidak valid.");
+    const {data,error}=await supabase.from("prescriptions").update({status:body.status}).eq("id",id).eq("organization_id",organizationId).select().single(); if(error)throw error; return {data};
+  }
   if(!options.method && simpleGets[path]){
     const [table,column]=simpleGets[path];
     const {data,error}=await supabase.from(table).select("*").eq("organization_id",organizationId).order(column,{ascending:false}); if(error)throw error; return {data};
