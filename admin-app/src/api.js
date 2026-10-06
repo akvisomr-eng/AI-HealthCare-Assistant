@@ -78,7 +78,7 @@ async function request(path,options={}){
   }
   if(path.startsWith("/api/admin/work-items/") && options.method==="PATCH"){
     const id=path.split("/").pop();
-    const {data,error}=await supabase.from("module_work_items").update({status:body.status,title:body.title,reference:body.reference||null,amount:body.amount||null,due_date:body.dueDate||null,notes:body.notes||null}).eq("id",id).eq("organization_id",organizationId).select().single();
+    const patch={}; if(body.status!==undefined) patch.status=body.status; if(body.title!==undefined) patch.title=body.title; if(body.reference!==undefined) patch.reference=body.reference||null; if(body.amount!==undefined) patch.amount=body.amount||null; if(body.dueDate!==undefined) patch.due_date=body.dueDate||null; if(body.notes!==undefined) patch.notes=body.notes||null; const {data,error}=await supabase.from("module_work_items").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
     if(error)throw error; return {data};
   }
   throw new Error("Endpoint Admin belum tersedia: "+path);
