@@ -22,7 +22,7 @@ test("RME membuka workflow Encounter dan dapat kembali", async () => {
   const encounterCard=encounterHeading.closest("section");
   expect(encounterCard).toBeTruthy();
   fireEvent.click(encounterCard.querySelector("button"));
-  expect(screen.getByText("Encounter").closest("h3")).toBeInTheDocument();
+  expect(screen.getByRole("heading",{name:"Encounter",level:2})).toBeInTheDocument();
   expect(screen.getByRole("button",{name:"+ Encounter Baru"})).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"+ Encounter Baru"}));
   expect(screen.getByText("Encounter Baru")).toBeInTheDocument();
