@@ -1,4 +1,5 @@
-import React,{useMemo,useState} from "react";
+import React,{useEffect,useMemo,useState} from "react";
+import { apiGet, apiPost, isApiConfigured } from "./api";
 import "./index.css";
 
 const nav=[
@@ -46,12 +47,14 @@ function App(){
  const [modal,setModal]=useState(null);
  const [toast,setToast]=useState("");
  const [clinic,setClinic]=useState("Klinik SehatKita Jakarta");
+ const [apiMode,setApiMode]=useState("demo");
  const [patientForm,setPatientForm]=useState({name:"",gender:"L",birth:"",phone:""});
  const [appointmentForm,setAppointmentForm]=useState({patient:"",doctor:"dr. Aditya",date:"2026-10-07",time:"09:00",service:"Poli Umum"});
  const filteredPatients=useMemo(()=>patients.filter(x=>(x.name+" "+x.id).toLowerCase().includes(query.toLowerCase())),[patients,query]);
  const notify=(m)=>{setToast(m);setTimeout(()=>setToast(""),2400)};
- const addPatient=e=>{e.preventDefault();if(!patientForm.name)return;const id="RM-"+String(patients.length+1).padStart(4,"0");setPatients([{...patientForm,id,status:"Aktif",last:"Hari ini"},...patients]);setModal(null);setPatientForm({name:"",gender:"L",birth:"",phone:""});notify("Pasien berhasil ditambahkan ke data demo.")};
- const addAppointment=e=>{e.preventDefault();if(!appointmentForm.patient)return;setAppointments([{...appointmentForm,status:"Terjadwal"},...appointments]);setModal(null);notify("Janji temu berhasil dibuat.")};
+ useEffect(()=>{ let alive=true; if(!isApiConfigured()) return; (async()=>{ try { const [p,a]=await Promise.all([apiGet("/api/admin/patients"),apiGet("/api/admin/appointments")]); if(!alive)return; if(Array.isArray(p.data)) setPatients(p.data.map(x=>({id:x.medical_record_number,name:x.full_name,gender:x.gender,birth:x.birth_date||"",phone:x.phone||"",status:x.status==="ACTIVE"?"Aktif":x.status,last:x.updated_at?.slice(0,10)||""}))); if(Array.isArray(a.data)) setAppointments(a.data.map(x=>({time:x.appointment_time,patient:x.patient_name,doctor:x.doctor_name,service:x.service,status:x.status==="SCHEDULED"?"Terjadwal":x.status}))); setApiMode("live"); } catch(e){ if(alive){setApiMode("demo"); notify("API klinik belum tersedia; aplikasi memakai mode demo aman.")} } })(); return ()=>{alive=false}; },[]);
+ const addPatient=async e=>{e.preventDefault();if(!patientForm.name)return; const id="RM-"+String(patients.length+1).padStart(4,"0"); try{if(isApiConfigured()){await apiPost("/api/admin/patients",{medicalRecordNumber:id,fullName:patientForm.name,gender:patientForm.gender,birthDate:patientForm.birth,phone:patientForm.phone});setApiMode("live");notify("Pasien berhasil disimpan ke Clinic API.");}else{setPatients([{...patientForm,id,status:"Aktif",last:"Hari ini"},...patients]);notify("Pasien berhasil ditambahkan ke data demo.");}}catch(e){notify("API tidak dapat dihubungi; data demo tidak diubah.")} setModal(null);setPatientForm({name:"",gender:"L",birth:"",phone:""})};
+ const addAppointment=async e=>{e.preventDefault();if(!appointmentForm.patient)return; if(isApiConfigured()){const p=patients.find(x=>x.name===appointmentForm.patient); if(!p?.backendId){notify("Pilih pasien yang sudah terhubung ke backend.");return} try{await apiPost("/api/admin/appointments",{patientId:p.backendId,doctorName:appointmentForm.doctor,service:appointmentForm.service,appointmentDate:appointmentForm.date,appointmentTime:appointmentForm.time});notify("Janji temu tersimpan ke Clinic API.");}catch(e){notify("API tidak dapat dihubungi.")}}else{setAppointments([{...appointmentForm,status:"Terjadwal"},...appointments]);notify("Janji temu berhasil dibuat.")} setModal(null)};
 
  const dashboard=<>
   <PageTitle title="Dashboard Klinik" sub="Pusat kendali operasional Klinik SehatKita." actions={<button className="primary" onClick={()=>setModal("patient")}>+ Pasien Baru</button>}/>
