@@ -18,7 +18,8 @@ test("RME membuka workflow Encounter dan dapat kembali", async () => {
   render(<App />);
   fireEvent.click(await screen.findByRole("button",{name:/RME/}));
   expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
-  const encounterCard=screen.getByText("Encounter").closest("section");
+  const encounterHeading=screen.getAllByRole("heading",{name:"Encounter",level:3})[0];
+  const encounterCard=encounterHeading.closest("section");
   expect(encounterCard).toBeTruthy();
   fireEvent.click(encounterCard.querySelector("button"));
   expect(screen.getByText("Encounter").closest("h3")).toBeInTheDocument();
@@ -45,7 +46,8 @@ test("Admin Center dapat membuka formulir pasien", async () => {
 test("Workspace modul ditutup saat berpindah ke modul bisnis", async () => {
   render(<App />);
   fireEvent.click(await screen.findByRole("button",{name:/RME/}));
-  const encounterCard=screen.getByText("Encounter").closest("section");
+  const encounterHeading=screen.getAllByRole("heading",{name:"Encounter",level:3})[0];
+  const encounterCard=encounterHeading.closest("section");
   fireEvent.click(encounterCard.querySelector("button"));
   expect(screen.getByRole("button",{name:"+ Encounter Baru"})).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:/HRD/}));
