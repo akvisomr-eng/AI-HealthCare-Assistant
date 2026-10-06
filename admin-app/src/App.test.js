@@ -142,3 +142,16 @@ test("Billing membuka Tagihan dan Pembayaran tanpa workflow placeholder", async 
     fireEvent.click(screen.getByRole("button",{name:/Kembali ke Billing & Kasir/}));
   }
 });
+
+
+test("Keuangan membuka Chart of Accounts, Jurnal Umum, dan Kas & Bank tanpa placeholder", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Keuangan/}));
+  for (const title of ["Chart of Accounts","Jurnal Umum","Kas & Bank"]) {
+    const heading=screen.getAllByRole("heading",{name:title,level:3})[0];
+    fireEvent.click(heading.closest("section").querySelector("button"));
+    expect(screen.getByRole("heading",{name:title,level:2})).toBeInTheDocument();
+    expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:/Kembali ke Keuangan/}));
+  }
+});
