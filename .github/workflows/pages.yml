@@ -32,6 +32,10 @@ jobs:
         working-directory: react-app
         run: npm ci
 
+      - name: Uji mesin triase
+        working-directory: react-app
+        run: npm test -- --watchAll=false --runInBand healthKnowledge.test.js
+
       - name: Build
         working-directory: react-app
         env:
