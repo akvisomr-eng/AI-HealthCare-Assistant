@@ -80,3 +80,15 @@ test("Farmasi membuka antrean Resep Masuk tanpa placeholder integrasi", async ()
   expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
   expect(screen.getByText("Menunggu verifikasi")).toBeInTheDocument();
 });
+
+
+test("Workspace Purchasing tidak lagi placeholder dan terhubung ke workflow Supabase", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Purchasing/}));
+  const heading=screen.getAllByRole("heading",{name:"Purchase Request",level:3})[0];
+  fireEvent.click(heading.closest("section").querySelector("button"));
+  expect(screen.getByRole("heading",{name:"Purchase Request",level:2})).toBeInTheDocument();
+  expect(screen.getByText(/Belum ada entri Purchase Request/)).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:/Buat entri Purchase Request/})).toBeInTheDocument();
+  expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
+});
