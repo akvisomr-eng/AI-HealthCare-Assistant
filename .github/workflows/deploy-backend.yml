@@ -12,11 +12,24 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' && secrets.ADMIN_API_TOKEN != '' }}
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ADMIN_API_TOKEN: ${{ secrets.ADMIN_API_TOKEN }}
+      D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Periksa kredensial deployment
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && [ -n "$ADMIN_API_TOKEN" ] && [ -n "$D1_DATABASE_ID" ]; then
+            echo "DEPLOY_ENABLED=true" >> "$GITHUB_ENV"
+            echo "Kredensial Cloudflare lengkap; deployment diaktifkan."
+          else
+            echo "DEPLOY_ENABLED=false" >> "$GITHUB_ENV"
+            echo "Kredensial Cloudflare belum lengkap; deployment backend dilewati dengan aman."
+          fi
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -25,6 +38,7 @@ jobs:
         working-directory: backend
         run: npm test
       - name: Siapkan Wrangler
+        if: env.DEPLOY_ENABLED == 'true'
         working-directory: backend
         run: |
           cat > wrangler.toml <<EOF
@@ -40,14 +54,9 @@ jobs:
           database_name = "sehatkita-clinic"
           database_id = "${D1_DATABASE_ID}"
           EOF
-        env:
-          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
       - name: Deploy Worker dan migrasi D1
+        if: env.DEPLOY_ENABLED == 'true'
         working-directory: backend
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          ADMIN_API_TOKEN: ${{ secrets.ADMIN_API_TOKEN }}
         run: |
           npx --yes wrangler@latest d1 execute sehatkita-clinic --remote --file=schema.sql
           printf '%s' "$ADMIN_API_TOKEN" | npx --yes wrangler@latest secret put ADMIN_API_TOKEN
