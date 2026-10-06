@@ -5,7 +5,7 @@ import App from "./App";
 test("Admin Center menampilkan modul klinik", () => {
   render(<App />);
   expect(screen.getByText("Dashboard Klinik")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: /^Pasien$/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Pasien/ }));
   expect(screen.getByText("Manajemen Pasien")).toBeInTheDocument();
 });
 
