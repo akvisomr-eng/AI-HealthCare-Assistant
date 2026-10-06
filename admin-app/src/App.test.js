@@ -18,7 +18,8 @@ test("RME membuka workflow Encounter dan dapat kembali", async () => {
   render(<App />);
   fireEvent.click(await screen.findByRole("button",{name:/RME/}));
   expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Buka modul →"}));
+  const encounterCard=screen.getByText("Encounter").closest("section");
+  fireEvent.click(encounterCard.querySelector("button"));
   expect(screen.getByText("Ruang kerja modul")).toBeInTheDocument();
   expect(screen.getByText("Encounter")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:/Kembali ke Rekam Medis Elektronik/}));
