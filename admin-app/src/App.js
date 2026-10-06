@@ -40,19 +40,7 @@ function Card({children,className=""}){return <section className={"card "+classN
 function Badge({children,tone="blue"}){return <span className={"badge "+tone}>{children}</span>}
 function Field({label,children}){return <label className="field"><span>{label}</span>{children}</label>}
 
-function App(){
- const [session,setSession]=useState(null);
- const [authLoading,setAuthLoading]=useState(true);
- const [authMode,setAuthMode]=useState("login");
- const [authEmail,setAuthEmail]=useState("");
- const [authPassword,setAuthPassword]=useState("");
- const [authMessage,setAuthMessage]=useState("");
- const [authBusy,setAuthBusy]=useState(false);
- useEffect(()=>{let alive=true; supabase.auth.getSession().then(({data})=>{if(alive){setSession(data.session);setAuthLoading(false)}}); const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setSession(s);setAuthLoading(false)}); return()=>{alive=false;subscription.unsubscribe()};},[]);
- const submitAuth=async e=>{e.preventDefault();setAuthBusy(true);setAuthMessage("");try{if(authMode==="login"){const {error}=await supabase.auth.signInWithPassword({email:authEmail,password:authPassword});if(error)throw error;}else{const {data,error}=await supabase.auth.signUp({email:authEmail,password:authPassword});if(error)throw error;if(!data.session)setAuthMessage("Akun dibuat. Jika konfirmasi email aktif, cek email Anda lalu masuk.");}}catch(e){setAuthMessage(e.message||"Autentikasi gagal.");}finally{setAuthBusy(false)}};
- if(authLoading)return <div className="authscreen"><div className="authcard"><b>✚ SehatKita</b><p>Memeriksa sesi aman...</p></div></div>;
- if(!session)return <div className="authscreen"><div className="authcard"><div className="brandmark">✚</div><h1>SehatKita Admin</h1><p>{authMode==="login"?"Masuk ke Clinic Management Center":"Buat akun administrator"}</p><form onSubmit={submitAuth}><Field label="Email"><input type="email" required value={authEmail} onChange={e=>setAuthEmail(e.target.value)}/></Field><Field label="Password"><input type="password" minLength="6" required value={authPassword} onChange={e=>setAuthPassword(e.target.value)}/></Field>{authMessage&&<div className="authmessage">{authMessage}</div>}<button className="primary full" disabled={authBusy}>{authBusy?"Memproses...":authMode==="login"?"Masuk":"Daftar"}</button></form><button className="link authswitch" onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setAuthMessage("")}}>{authMode==="login"?"Belum punya akun? Daftar":"Sudah punya akun? Masuk"}</button><small>Data klinis hanya dapat diakses setelah autentikasi dan policy organisasi.</small></div></div>;
-
+function ClinicApp(){
  const [page,setPage]=useState("dashboard");
  const [patients,setPatients]=useState(initialPatients);
  const [appointments,setAppointments]=useState(initialAppointments);
@@ -106,4 +94,18 @@ function PageTitle({title,sub,actions}){return <div className="pagetitle"><div><
 function PanelHead({title,action,onClick}){return <div className="panelhead"><h3>{title}</h3>{action&&<button onClick={onClick} className="link">{action} →</button>}</div>}
 function Table({headers,rows}){return <div className="tablewrap"><table><thead><tr>{headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}
 function Modal({title,close,children}){return <div className="overlay" onMouseDown={e=>e.target===e.currentTarget&&close()}><div className="modal"><div className="modalhead"><h2>{title}</h2><button onClick={close}>×</button></div>{children}</div></div>}
+function App(){
+ const [session,setSession]=useState(null);
+ const [authLoading,setAuthLoading]=useState(true);
+ const [authMode,setAuthMode]=useState("login");
+ const [authEmail,setAuthEmail]=useState("");
+ const [authPassword,setAuthPassword]=useState("");
+ const [authMessage,setAuthMessage]=useState("");
+ const [authBusy,setAuthBusy]=useState(false);
+ useEffect(()=>{let alive=true; supabase.auth.getSession().then(({data})=>{if(alive){setSession(data.session);setAuthLoading(false)}}); const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setSession(s);setAuthLoading(false)}); return()=>{alive=false;subscription.unsubscribe()};},[]);
+ const submitAuth=async e=>{e.preventDefault();setAuthBusy(true);setAuthMessage("");try{if(authMode==="login"){const {error}=await supabase.auth.signInWithPassword({email:authEmail,password:authPassword});if(error)throw error;}else{const {data,error}=await supabase.auth.signUp({email:authEmail,password:authPassword});if(error)throw error;if(!data.session)setAuthMessage("Akun dibuat. Jika konfirmasi email aktif, cek email Anda lalu masuk.");}}catch(e){setAuthMessage(e.message||"Autentikasi gagal.");}finally{setAuthBusy(false)}};
+ if(authLoading)return <div className="authscreen"><div className="authcard"><b>✚ SehatKita</b><p>Memeriksa sesi aman...</p></div></div>;
+ if(!session)return <div className="authscreen"><div className="authcard"><div className="brandmark">✚</div><h1>SehatKita Admin</h1><p>{authMode==="login"?"Masuk ke Clinic Management Center":"Buat akun administrator"}</p><form onSubmit={submitAuth}><Field label="Email"><input type="email" required value={authEmail} onChange={e=>setAuthEmail(e.target.value)}/></Field><Field label="Password"><input type="password" minLength="6" required value={authPassword} onChange={e=>setAuthPassword(e.target.value)}/></Field>{authMessage&&<div className="authmessage">{authMessage}</div>}<button className="primary full" disabled={authBusy}>{authBusy?"Memproses...":authMode==="login"?"Masuk":"Daftar"}</button></form><button className="link authswitch" onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setAuthMessage("")}}>{authMode==="login"?"Belum punya akun? Daftar":"Sudah punya akun? Masuk"}</button><small>Data klinis hanya dapat diakses setelah autentikasi dan policy organisasi.</small></div></div>;
+ return <ClinicApp/>;
+}
 export default App;
