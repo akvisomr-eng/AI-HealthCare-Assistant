@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import App from "./App";
 
 jest.mock("./api",()=>({isApiConfigured:()=>false,apiGet:jest.fn(),apiPost:jest.fn(),apiPatch:jest.fn()}));
@@ -88,7 +88,7 @@ test("Workspace Purchasing tidak lagi placeholder dan terhubung ke workflow Supa
   const heading=screen.getAllByRole("heading",{name:"Purchase Request",level:3})[0];
   fireEvent.click(heading.closest("section").querySelector("button"));
   expect(screen.getByRole("heading",{name:"Purchase Request",level:2})).toBeInTheDocument();
-  expect(screen.getByText(/Belum ada entri Purchase Request/)).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByText(/Belum ada entri Purchase Request/)).toBeInTheDocument());
   expect(screen.getByRole("button",{name:/Buat entri Purchase Request/})).toBeInTheDocument();
   expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
 });
