@@ -75,7 +75,8 @@ function ClinicApp(){
  const [billingInvoices,setBillingInvoices]=useState([]);
  const [invoicePayments,setInvoicePayments]=useState([]);
  const [billingInvoiceForm,setBillingInvoiceForm]=useState({invoiceNumber:"",patientId:"",status:"draft",subtotal:"",taxAmount:"",discountAmount:"",totalAmount:"",dueAt:"",notes:""});
- const [invoicePaymentForm,setInvoicePaymentForm]=useState({invoiceId:"",paymentNumber:"",amount:"",method:"cash",paidAt:"",reference:"",notes:""});\n const [financialAccounts,setFinancialAccounts]=useState([]); const [financialTransactions,setFinancialTransactions]=useState([]); const [cashBankTransactions,setCashBankTransactions]=useState([]);
+ const [invoicePaymentForm,setInvoicePaymentForm]=useState({invoiceId:"",paymentNumber:"",amount:"",method:"cash",paidAt:"",reference:"",notes:""});
+ const [financialAccounts,setFinancialAccounts]=useState([]); const [financialTransactions,setFinancialTransactions]=useState([]); const [cashBankTransactions,setCashBankTransactions]=useState([]);
  const [moduleBusy,setModuleBusy]=useState(false);
  const [moduleForm,setModuleForm]=useState({title:"",reference:"",status:"draft",amount:"",dueDate:"",notes:""});
  const [inventoryItems,setInventoryItems]=useState([]);
