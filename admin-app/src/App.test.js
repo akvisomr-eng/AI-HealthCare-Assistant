@@ -96,6 +96,7 @@ test("Workspace Purchasing tidak lagi placeholder dan terhubung ke workflow Supa
 
 test("Inventory membuka Kartu Stok tanpa workflow placeholder", async () => {
   render(<App />);
+  await screen.findByText("Dashboard Klinik");
   const tombolInventory=screen.getAllByRole("button",{name:/Inventory/}).find(button=>button.classList.contains("nav"));
   expect(tombolInventory).toBeDefined();
   fireEvent.click(tombolInventory);
