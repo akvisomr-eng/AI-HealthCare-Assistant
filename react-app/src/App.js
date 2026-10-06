@@ -17,21 +17,35 @@ function App() {
     return { level: cocok.length >= 2 ? "Perlu diperiksa" : "Pantau dan konsultasikan", warna: cocok.length >= 2 ? "kuning" : "hijau", teks: cocok.length >= 2 ? "Beberapa gejala terdeteksi. Pertimbangkan berkonsultasi dengan tenaga kesehatan, terutama bila keluhan memburuk atau menetap." : "Informasi belum cukup untuk menilai keluhan. Pantau kondisi dan konsultasikan dengan tenaga kesehatan bila Anda khawatir." };
   }, [keluhan]);
 
-  const buka = (nama) => { setTab(nama); window.scrollTo({top:0, behavior:"smooth"}); };
+  const buka = (nama) => {
+    setTab(nama);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const menujuBagian = (id) => {
+    if (tab !== "beranda") {
+      setTab("beranda");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      });
+      return;
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="app">
       <header className="header">
-        <button className="logo" onClick={() => buka("beranda")} aria-label="Beranda">
+        <button className="logo" type="button" onClick={() => buka("beranda")} aria-label="Beranda">
           <span className="logo-mark">✚</span><span>Sehat<span className="logo-accent">Kita</span></span>
         </button>
-        <nav>
-          <button className={tab==="beranda"?"active":""} onClick={() => buka("beranda")}>Beranda</button>
-          <button className={tab==="cek"?"active":""} onClick={() => buka("cek")}>Cek Keluhan</button>
-          <button onClick={() => document.getElementById("layanan")?.scrollIntoView({behavior:"smooth"})}>Layanan</button>
-          <button onClick={() => document.getElementById("tentang")?.scrollIntoView({behavior:"smooth"})}>Tentang</button>
+        <nav aria-label="Navigasi utama">
+          <button type="button" className={tab === "beranda" ? "active" : ""} onClick={() => buka("beranda")}>Beranda</button>
+          <button type="button" className={tab === "cek" ? "active" : ""} onClick={() => buka("cek")}>Cek Keluhan</button>
+          <button type="button" onClick={() => menujuBagian("layanan")}>Layanan</button>
+          <button type="button" onClick={() => menujuBagian("tentang")}>Tentang</button>
         </nav>
-        <button className="header-action" onClick={() => buka("cek")}>Mulai Sekarang →</button>
+        <button type="button" className="header-action" onClick={() => buka("cek")}>Mulai Sekarang →</button>
       </header>
 
       {tab === "cek" ? (
@@ -40,10 +54,10 @@ function App() {
             <span className="eyebrow">PANDUAN KESEHATAN AWAL</span>
             <h1>Ceritakan keluhan Anda</h1>
             <p>Masukkan gejala secara singkat. Sistem ini hanya memberikan panduan awal dan bukan diagnosis medis.</p>
-            <textarea value={keluhan} onChange={e=>setKeluhan(e.target.value)} placeholder="Contoh: sejak kemarin saya demam dan batuk..." />
-            <button className="primary large" onClick={() => setHasil(saran)}>Analisis Panduan</button>
-            {hasil && <div className={"result "+hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p><small>Jika kondisi terasa mengancam nyawa, jangan menunggu hasil aplikasi. Cari pertolongan medis segera.</small></div>}
-            <button className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
+            <textarea value={keluhan} onChange={e => setKeluhan(e.target.value)} placeholder="Contoh: sejak kemarin saya demam dan batuk..." />
+            <button type="button" className="primary large" onClick={() => setHasil(saran)}>Analisis Panduan</button>
+            {hasil && <div className={"result " + hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p><small>Jika kondisi terasa mengancam nyawa, jangan menunggu hasil aplikasi. Cari pertolongan medis segera.</small></div>}
+            <button type="button" className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
           </section>
         </main>
       ) : (
@@ -55,13 +69,13 @@ function App() {
                 <h1>Teman tepercaya untuk <span>kesehatan Anda.</span></h1>
                 <p>SehatKita membantu Anda memahami informasi kesehatan, menyiapkan konsultasi, dan mengelola perjalanan kesehatan dengan lebih terarah.</p>
                 <div className="hero-actions">
-                  <button className="primary" onClick={() => buka("cek")}>Cek Keluhan Gratis →</button>
-                  <button className="secondary" onClick={() => document.getElementById("layanan")?.scrollIntoView({behavior:"smooth"})}>Jelajahi Layanan</button>
+                  <button type="button" className="primary" onClick={() => buka("cek")}>Cek Keluhan Gratis →</button>
+                  <button type="button" className="secondary" onClick={() => menujuBagian("layanan")}>Jelajahi Layanan</button>
                 </div>
                 <div className="trust"><span>✓</span> Privasi diutamakan <span>✓</span> Tanpa diagnosis otomatis</div>
               </div>
-              <div className="hero-art" aria-hidden="true">
-                <div className="orb">✚</div><div className="float-card card-a">❤ <b>Jaga kesehatan</b><small>Setiap hari</small></div><div className="float-card card-b">✓ <b>Panduan terarah</b><small>Berbasis informasi</small></div>
+              <div className="hero-art">
+                <img className="hero-image" src={`${process.env.PUBLIC_URL}/hero-health.svg`} alt="Ilustrasi pendamping kesehatan digital SehatKita" />
               </div>
             </section>
 
@@ -70,9 +84,9 @@ function App() {
             <section id="layanan" className="section">
               <div className="section-heading"><span className="eyebrow">LAYANAN UTAMA</span><h2>Satu tempat untuk kebutuhan kesehatan Anda.</h2><p>Kita membangun platform ini bertahap dengan prinsip aman, transparan, dan berpusat pada pengguna.</p></div>
               <div className="grid">
-                <article className="service"><div className="icon blue">⌕</div><h3>Panduan Keluhan</h3><p>Jelaskan gejala dengan bahasa sehari-hari dan dapatkan panduan awal yang tidak menggantikan dokter.</p><button onClick={()=>buka("cek")}>Coba sekarang →</button></article>
-                <article className="service"><div className="icon green">◷</div><h3>Janji Temu</h3><p>Rencanakan kebutuhan konsultasi dan siapkan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p><button onClick={()=>alert("Fitur janji temu sedang kami bangun.")}>Segera hadir →</button></article>
-                <article className="service"><div className="icon purple">▣</div><h3>Catatan Kesehatan</h3><p>Tempat terstruktur untuk mengelola informasi kesehatan pribadi secara bertahap dan bertanggung jawab.</p><button onClick={()=>alert("Fitur catatan kesehatan sedang kami bangun.")}>Segera hadir →</button></article>
+                <article className="service"><div className="icon blue">⌕</div><h3>Panduan Keluhan</h3><p>Jelaskan gejala dengan bahasa sehari-hari dan dapatkan panduan awal yang tidak menggantikan dokter.</p><button type="button" onClick={() => buka("cek")}>Coba sekarang →</button></article>
+                <article className="service"><div className="icon green">◷</div><h3>Janji Temu</h3><p>Rencanakan kebutuhan konsultasi dan siapkan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p><button type="button" onClick={() => alert("Fitur janji temu sedang kami bangun.")}>Segera hadir →</button></article>
+                <article className="service"><div className="icon purple">▣</div><h3>Catatan Kesehatan</h3><p>Tempat terstruktur untuk mengelola informasi kesehatan pribadi secara bertahap dan bertanggung jawab.</p><button type="button" onClick={() => alert("Fitur catatan kesehatan sedang kami bangun.")}>Segera hadir →</button></article>
               </div>
             </section>
 
@@ -87,4 +101,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
