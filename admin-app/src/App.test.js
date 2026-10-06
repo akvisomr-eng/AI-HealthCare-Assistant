@@ -92,3 +92,15 @@ test("Workspace Purchasing tidak lagi placeholder dan terhubung ke workflow Supa
   expect(screen.getByRole("button",{name:/Buat entri Purchase Request/})).toBeInTheDocument();
   expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
 });
+
+
+test("Inventory membuka Kartu Stok tanpa workflow placeholder", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Inventory/}));
+  const heading=screen.getAllByRole("heading",{name:"Kartu Stok",level:3})[0];
+  fireEvent.click(heading.closest("section").querySelector("button"));
+  expect(screen.getByRole("heading",{name:"Kartu Stok",level:2})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"+ Item Baru"})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"+ Mutasi Stok"})).toBeInTheDocument();
+  expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
+});
