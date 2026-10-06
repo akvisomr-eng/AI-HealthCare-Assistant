@@ -47,7 +47,7 @@ test("Workspace modul ditutup saat berpindah ke modul bisnis", async () => {
   fireEvent.click(await screen.findByRole("button",{name:/RME/}));
   const encounterCard=screen.getByText("Encounter").closest("section");
   fireEvent.click(encounterCard.querySelector("button"));
-  expect(screen.getByText("Ruang kerja modul")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"+ Encounter Baru"})).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:/HRD/}));
   expect(screen.getByRole("heading",{name:"HRD",level:1})).toBeInTheDocument();
   expect(screen.queryByText("Ruang kerja modul")).not.toBeInTheDocument();
