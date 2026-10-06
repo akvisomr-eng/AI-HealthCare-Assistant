@@ -67,6 +67,20 @@ async function request(path,options={}){
   if(path==="/api/admin/appointments" && options.method==="POST"){
     const {data,error}=await supabase.from("appointments").insert({organization_id:organizationId,patient_id:body.patientId,doctor_name:body.doctorName,service:body.service,appointment_date:body.appointmentDate,appointment_time:body.appointmentTime,status:"scheduled"}).select().single(); if(error)throw error; return {data};
   }
+  if(path.startsWith("/api/admin/work-items/") && !options.method){
+    const moduleKey=decodeURIComponent(path.split("/").pop());
+    const {data,error}=await supabase.from("module_work_items").select("*").eq("organization_id",organizationId).eq("module_key",moduleKey).order("updated_at",{ascending:false});
+    if(error)throw error; return {data:data||[]};
+  }
+  if(path==="/api/admin/work-items" && options.method==="POST"){
+    const {data,error}=await supabase.from("module_work_items").insert({organization_id:organizationId,module_key:body.moduleKey,title:body.title,reference:body.reference||null,status:body.status||"draft",amount:body.amount||null,due_date:body.dueDate||null,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
+    if(error)throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/work-items/") && options.method==="PATCH"){
+    const id=path.split("/").pop();
+    const {data,error}=await supabase.from("module_work_items").update({status:body.status,title:body.title,reference:body.reference||null,amount:body.amount||null,due_date:body.dueDate||null,notes:body.notes||null}).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error)throw error; return {data};
+  }
   throw new Error("Endpoint Admin belum tersedia: "+path);
 }
 export const apiGet=path=>request(path);
