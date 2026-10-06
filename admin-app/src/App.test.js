@@ -107,3 +107,15 @@ test("Inventory membuka Kartu Stok tanpa workflow placeholder", async () => {
   expect(screen.getByRole("button",{name:"+ Mutasi Stok"})).toBeInTheDocument();
   expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
 });
+
+test("Purchasing membuka Purchase Order, Goods Receipt, dan Supplier tanpa placeholder", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Purchasing/}));
+  for (const title of ["Purchase Order","Goods Receipt","Supplier"]) {
+    const heading=screen.getAllByRole("heading",{name:title,level:3})[0];
+    fireEvent.click(heading.closest("section").querySelector("button"));
+    expect(screen.getByRole("heading",{name:title,level:2})).toBeInTheDocument();
+    expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:new RegExp("Kembali ke Purchasing & Supplier")}));
+  }
+});
