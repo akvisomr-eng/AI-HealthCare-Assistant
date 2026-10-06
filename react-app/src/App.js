@@ -6,6 +6,10 @@ function App() {
   const [tab, setTab] = useState("beranda");
   const [keluhan, setKeluhan] = useState("");
   const [hasil, setHasil] = useState(null);
+  const [janji, setJanji] = useState({ tenaga: "", tanggal: "", waktu: "", tujuan: "", catatan: "" });
+  const [janjiTersimpan, setJanjiTersimpan] = useState(null);
+  const [catatan, setCatatan] = useState({ judul: "", isi: "", tanggal: new Date().toISOString().slice(0, 10) });
+  const [daftarCatatan, setDaftarCatatan] = useState([]);
 
   const saran = useMemo(() => analisisKeluhan(keluhan), [keluhan]);
 
@@ -13,6 +17,10 @@ function App() {
     setTab(nama);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const simpanJanji = (e) => { e.preventDefault(); if (!janji.tanggal || !janji.waktu || !janji.tujuan) return; setJanjiTersimpan({ ...janji }); };
+
+  const tambahCatatan = (e) => { e.preventDefault(); if (!catatan.isi.trim()) return; setDaftarCatatan(prev => [{ ...catatan, id: Date.now() }, ...prev]); setCatatan({ judul: "", isi: "", tanggal: new Date().toISOString().slice(0, 10) }); };
 
   const menujuBagian = (id) => {
     if (tab !== "beranda") {
@@ -34,13 +42,43 @@ function App() {
         <nav aria-label="Navigasi utama">
           <button type="button" className={tab === "beranda" ? "active" : ""} onClick={() => buka("beranda")}>Beranda</button>
           <button type="button" className={tab === "cek" ? "active" : ""} onClick={() => buka("cek")}>Cek Keluhan</button>
-          <button type="button" onClick={() => menujuBagian("layanan")}>Layanan</button>
+          <button type="button" onClick={() => buka("layanan")}>Layanan</button>
+          <button type="button" onClick={() => buka("janji")}>Janji Temu</button>
+          <button type="button" onClick={() => buka("catatan")}>Catatan</button>
           <button type="button" onClick={() => menujuBagian("tentang")}>Tentang</button>
         </nav>
         <button type="button" className="header-action" onClick={() => buka("cek")}>Mulai Sekarang →</button>
       </header>
 
-      {tab === "cek" ? (
+      {tab === "janji" ? (
+        <main className="feature-page"><section className="feature-card">
+          <span className="eyebrow">PERENCANAAN KONSULTASI</span><h1>Janji Temu</h1>
+          <p>Siapkan rencana konsultasi dan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p>
+          <form onSubmit={simpanJanji} className="feature-form">
+            <label>Tenaga kesehatan / layanan<input value={janji.tenaga} onChange={e => setJanji({...janji, tenaga:e.target.value})} placeholder="Contoh: Dokter umum / Klinik" /></label>
+            <div className="form-row"><label>Tanggal<input type="date" value={janji.tanggal} min={new Date().toISOString().slice(0,10)} onChange={e => setJanji({...janji, tanggal:e.target.value})} required /></label><label>Waktu<input type="time" value={janji.waktu} onChange={e => setJanji({...janji, waktu:e.target.value})} required /></label></div>
+            <label>Tujuan konsultasi<textarea value={janji.tujuan} onChange={e => setJanji({...janji, tujuan:e.target.value})} placeholder="Keluhan atau alasan utama konsultasi..." required /></label>
+            <label>Informasi yang ingin disampaikan<textarea value={janji.catatan} onChange={e => setJanji({...janji, catatan:e.target.value})} placeholder="Kapan mulai, perubahan keluhan, obat yang digunakan, pertanyaan untuk tenaga kesehatan..." /></label>
+            <button className="primary large" type="submit">Simpan Rencana Konsultasi</button>
+          </form>
+          {janjiTersimpan && <div className="saved-card"><strong>Rencana konsultasi tersimpan</strong><p><b>{janjiTersimpan.tanggal} · {janjiTersimpan.waktu}</b>{janjiTersimpan.tenaga ? ` · ${janjiTersimpan.tenaga}` : ""}</p><p>{janjiTersimpan.tujuan}</p>{janjiTersimpan.catatan && <p><b>Catatan:</b> {janjiTersimpan.catatan}</p>}</div>}
+          <div className="privacy-note">Privasi: data fitur demo ini hanya berada di memori sesi browser dan tidak dikirim atau disimpan ke server.</div>
+          <button type="button" className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
+        </section></main>
+      ) : tab === "catatan" ? (
+        <main className="feature-page"><section className="feature-card">
+          <span className="eyebrow">CATATAN PRIBADI SEMENTARA</span><h1>Catatan Kesehatan</h1>
+          <p>Catat informasi yang ingin Anda bawa saat berkonsultasi. Jangan memasukkan data identitas atau informasi sangat sensitif pada versi demo.</p>
+          <form onSubmit={tambahCatatan} className="feature-form">
+            <div className="form-row"><label>Judul catatan<input value={catatan.judul} onChange={e => setCatatan({...catatan, judul:e.target.value})} placeholder="Contoh: Keluhan minggu ini" /></label><label>Tanggal<input type="date" value={catatan.tanggal} onChange={e => setCatatan({...catatan, tanggal:e.target.value})} /></label></div>
+            <label>Isi catatan<textarea className="note-editor" value={catatan.isi} onChange={e => setCatatan({...catatan, isi:e.target.value})} placeholder="Tulis keluhan, perubahan kondisi, pertanyaan untuk dokter, atau informasi lain yang relevan..." required /></label>
+            <button className="primary large" type="submit">Tambahkan Catatan</button>
+          </form>
+          <div className="notes-list">{daftarCatatan.length === 0 ? <div className="empty-state">Belum ada catatan pada sesi ini. Tambahkan catatan pertama Anda di atas.</div> : daftarCatatan.map(item => <article className="note-card" key={item.id}><div><span>{item.tanggal}</span><h3>{item.judul || "Catatan kesehatan"}</h3></div><p>{item.isi}</p></article>)}</div>
+          <div className="privacy-note">Privasi: catatan tidak memakai localStorage, database, atau pengiriman jaringan. Catatan akan hilang saat sesi aplikasi ditutup atau dimuat ulang.</div>
+          <button type="button" className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
+        </section></main>
+      ) : tab === "cek" ? (
         <main className="check-page">
           <section className="check-card">
             <span className="eyebrow">PANDUAN KESEHATAN AWAL</span>
@@ -77,8 +115,8 @@ function App() {
               <div className="section-heading"><span className="eyebrow">LAYANAN UTAMA</span><h2>Satu tempat untuk kebutuhan kesehatan Anda.</h2><p>Kita membangun platform ini bertahap dengan prinsip aman, transparan, dan berpusat pada pengguna.</p></div>
               <div className="grid">
                 <article className="service"><div className="icon blue">⌕</div><h3>Panduan Keluhan</h3><p>Jelaskan gejala dengan bahasa sehari-hari dan dapatkan panduan awal yang tidak menggantikan dokter.</p><button type="button" onClick={() => buka("cek")}>Coba sekarang →</button></article>
-                <article className="service"><div className="icon green">◷</div><h3>Janji Temu</h3><p>Rencanakan kebutuhan konsultasi dan siapkan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p><button type="button" onClick={() => alert("Fitur janji temu sedang kami bangun.")}>Segera hadir →</button></article>
-                <article className="service"><div className="icon purple">▣</div><h3>Catatan Kesehatan</h3><p>Tempat terstruktur untuk mengelola informasi kesehatan pribadi secara bertahap dan bertanggung jawab.</p><button type="button" onClick={() => alert("Fitur catatan kesehatan sedang kami bangun.")}>Segera hadir →</button></article>
+                <article className="service"><div className="icon green">◷</div><h3>Janji Temu</h3><p>Rencanakan kebutuhan konsultasi dan siapkan informasi yang ingin Anda sampaikan kepada tenaga kesehatan.</p><button type="button" onClick={() => buka("janji")}>Buka Janji Temu →</button></article>
+                <article className="service"><div className="icon purple">▣</div><h3>Catatan Kesehatan</h3><p>Tempat terstruktur untuk mengelola informasi kesehatan pribadi secara bertahap dan bertanggung jawab.</p><button type="button" onClick={() => buka("catatan")}>Buka Catatan →</button></article>
               </div>
             </section>
 
