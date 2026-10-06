@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from "react";
 import "./index.css";
 
+import { analisisKeluhan } from "./healthKnowledge";\n\nimport React, { useMemo, useState } from "react";
+import "./index.css";
+
 const kelompokGejala = [
   { nama: "demam", pola: ["demam", "badan panas", "badan terasa panas", "suhu tubuh naik", "suhu badan naik", "panas tinggi"] },
   { nama: "batuk", pola: ["batuk", "batuk-batuk", "batuk batuk"] },
