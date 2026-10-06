@@ -100,6 +100,60 @@ async function request(path,options={}){
     const {data,error}=await supabase.from("module_work_items").insert({organization_id:organizationId,module_key:body.moduleKey,title:body.title,reference:body.reference||null,status:body.status||"draft",amount:body.amount||null,due_date:body.dueDate||null,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
     if(error)throw error; return {data};
   }
+  if(path==="/api/admin/suppliers" && !options.method){
+    const {data,error}=await supabase.from("suppliers").select("*").eq("organization_id",organizationId).order("name",{ascending:true});
+    if(error) throw error; return {data:data||[]};
+  }
+  if(path==="/api/admin/suppliers" && options.method==="POST"){
+    const {data,error}=await supabase.from("suppliers").insert({organization_id:organizationId,supplier_code:body.supplierCode,name:body.name,contact_name:body.contactName||null,phone:body.phone||null,email:body.email||null,address:body.address||null,tax_number:body.taxNumber||null,status:body.status||"active"}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/suppliers/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.name!==undefined) patch.name=body.name;
+    if(body.contactName!==undefined) patch.contact_name=body.contactName||null;
+    if(body.phone!==undefined) patch.phone=body.phone||null;
+    if(body.email!==undefined) patch.email=body.email||null;
+    if(body.address!==undefined) patch.address=body.address||null;
+    if(body.taxNumber!==undefined) patch.tax_number=body.taxNumber||null;
+    if(body.status!==undefined) patch.status=body.status;
+    const {data,error}=await supabase.from("suppliers").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path==="/api/admin/purchase-orders" && !options.method){
+    const {data,error}=await supabase.from("purchase_orders").select("*,suppliers(name,supplier_code)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
+    if(error) throw error; return {data:(data||[]).map(x=>({...x,supplier_name:x.suppliers?.name||"—",supplier_code:x.suppliers?.supplier_code||"—"}))};
+  }
+  if(path==="/api/admin/purchase-orders" && options.method==="POST"){
+    const {data,error}=await supabase.from("purchase_orders").insert({organization_id:organizationId,purchase_request_id:body.purchaseRequestId||null,supplier_id:body.supplierId||null,order_number:body.orderNumber,title:body.title,order_date:body.orderDate||new Date().toISOString().slice(0,10),expected_date:body.expectedDate||null,total_amount:Number(body.totalAmount)||0,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/purchase-orders/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.status!==undefined) patch.status=body.status;
+    if(body.supplierId!==undefined) patch.supplier_id=body.supplierId||null;
+    if(body.expectedDate!==undefined) patch.expected_date=body.expectedDate||null;
+    if(body.totalAmount!==undefined) patch.total_amount=Number(body.totalAmount)||0;
+    if(body.notes!==undefined) patch.notes=body.notes||null;
+    const {data,error}=await supabase.from("purchase_orders").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path==="/api/admin/goods-receipts" && !options.method){
+    const {data,error}=await supabase.from("goods_receipts").select("*,purchase_orders(order_number),suppliers(name)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
+    if(error) throw error; return {data:(data||[]).map(x=>({...x,order_number:x.purchase_orders?.order_number||"—",supplier_name:x.suppliers?.name||"—"}))};
+  }
+  if(path==="/api/admin/goods-receipts" && options.method==="POST"){
+    const {data,error}=await supabase.from("goods_receipts").insert({organization_id:organizationId,purchase_order_id:body.purchaseOrderId||null,receipt_number:body.receiptNumber,supplier_id:body.supplierId||null,received_at:body.receivedAt||new Date().toISOString(),status:body.status||"received",total_amount:Number(body.totalAmount)||0,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/goods-receipts/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.status!==undefined) patch.status=body.status;
+    if(body.totalAmount!==undefined) patch.total_amount=Number(body.totalAmount)||0;
+    if(body.notes!==undefined) patch.notes=body.notes||null;
+    const {data,error}=await supabase.from("goods_receipts").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
   if(path==="/api/admin/purchase-requests" && !options.method){
     const {data,error}=await supabase.from("purchase_requests").select("*").eq("organization_id",organizationId).order("updated_at",{ascending:false});
     if(error) throw error; return {data:data||[]};
