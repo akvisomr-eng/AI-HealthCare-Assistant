@@ -1,0 +1,13 @@
+name = "sehatkita-clinic-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://akvisomr-eng.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sehatkita-clinic"
+database_id = "ISI_DATABASE_ID"
+
+# Secret: wrangler secret put ADMIN_API_TOKEN
