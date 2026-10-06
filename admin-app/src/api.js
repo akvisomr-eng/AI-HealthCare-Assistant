@@ -125,7 +125,7 @@ async function request(path,options={}){
     if(error) throw error; return {data:(data||[]).map(x=>({...x,supplier_name:x.suppliers?.name||"—",supplier_code:x.suppliers?.supplier_code||"—"}))};
   }
   if(path==="/api/admin/purchase-orders" && options.method==="POST"){
-    const {data,error}=await supabase.from("purchase_orders").insert({organization_id:organizationId,purchase_request_id:body.purchaseRequestId||null,supplier_id:body.supplierId||null,order_number:body.orderNumber,title:body.title,order_date:body.orderDate||new Date().toISOString().slice(0,10),expected_date:body.expectedDate||null,total_amount:Number(body.totalAmount)||0,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
+    const {data,error}=await supabase.from("purchase_orders").insert({organization_id:organizationId,purchase_request_id:body.purchaseRequestId||null,supplier_id:body.supplierId||null,order_number:body.orderNumber,order_date:body.orderDate||new Date().toISOString().slice(0,10),expected_date:body.expectedDate||null,total_amount:Number(body.totalAmount)||0,notes:body.notes||null,created_by:(await supabase.auth.getUser()).data.user?.id||null}).select().single();
     if(error) throw error; return {data};
   }
   if(path.startsWith("/api/admin/purchase-orders/") && options.method==="PATCH"){
