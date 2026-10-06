@@ -89,7 +89,7 @@ test("Workspace Purchasing tidak lagi placeholder dan terhubung ke workflow Supa
   fireEvent.click(heading.closest("section").querySelector("button"));
   expect(screen.getByRole("heading",{name:"Purchase Request",level:2})).toBeInTheDocument();
   await waitFor(() => expect(screen.getByText(/Belum ada entri Purchase Request/)).toBeInTheDocument());
-  expect(screen.getByRole("button",{name:/Buat entri Purchase Request/})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"+ Purchase Request"})).toBeInTheDocument();
   expect(screen.queryByText(/Integrasi transaksi modul ini menjadi tahap berikutnya/)).not.toBeInTheDocument();
 });
 
