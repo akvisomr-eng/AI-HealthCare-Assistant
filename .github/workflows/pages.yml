@@ -43,6 +43,14 @@ jobs:
           REACT_APP_ALAN_AI_KEY: ""
         run: npm run build
 
+      - name: Validasi hasil build
+        working-directory: react-app
+        run: |
+          test -f build/index.html
+          test -d build/static
+          grep -q "/AI-HealthCare-Assistant/static/" build/index.html
+          echo "Build GitHub Pages valid: jalur aset memakai prefix repository."
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
