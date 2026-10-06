@@ -119,3 +119,13 @@ test("Purchasing membuka Purchase Order, Goods Receipt, dan Supplier tanpa place
     fireEvent.click(screen.getByRole("button",{name:new RegExp("Kembali ke Purchasing & Supplier")}));
   }
 });
+
+test("Purchasing membuka Invoice Vendor tanpa workflow placeholder", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/Purchasing/}));
+  const heading=screen.getAllByRole("heading",{name:"Invoice Vendor",level:3})[0];
+  fireEvent.click(heading.closest("section").querySelector("button"));
+  expect(screen.getByRole("heading",{name:"Invoice Vendor",level:2})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"+ Invoice Vendor"})).toBeInTheDocument();
+  expect(screen.queryByText(/Ruang kerja modul/)).not.toBeInTheDocument();
+});
