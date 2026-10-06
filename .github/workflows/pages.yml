@@ -47,6 +47,10 @@ jobs:
           REACT_APP_ALAN_AI_KEY: ""
         run: npm run build
 
+      - name: Uji Admin Center
+        working-directory: admin-app
+        run: npm install --no-audit --no-fund && npm test -- --watchAll=false --runInBand
+
       - name: Build Admin Center
         working-directory: admin-app
         env:
