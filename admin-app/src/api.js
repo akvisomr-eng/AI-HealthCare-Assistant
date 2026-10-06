@@ -138,6 +138,45 @@ async function request(path,options={}){
     const {data,error}=await supabase.from("purchase_orders").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
     if(error) throw error; return {data};
   }
+  if(path==="/api/admin/invoices" && !options.method){
+    const {data,error}=await supabase.from("invoices").select("*,patients(full_name,medical_record_number)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
+    if(error) throw error;
+    return {data:(data||[]).map(x=>({...x,patient_name:x.patients?.full_name||"—",medical_record_number:x.patients?.medical_record_number||"—"}))};
+  }
+  if(path==="/api/admin/invoices" && options.method==="POST"){
+    const user=(await supabase.auth.getUser()).data.user;
+    const {data,error}=await supabase.from("invoices").insert({organization_id:organizationId,patient_id:body.patientId||null,branch_id:body.branchId||null,invoice_number:body.invoiceNumber,status:body.status||"draft",subtotal:Number(body.subtotal)||0,tax_amount:Number(body.taxAmount)||0,discount_amount:Number(body.discountAmount)||0,total_amount:Number(body.totalAmount)||0,due_at:body.dueAt||null,issued_at:body.status==="issued"?new Date().toISOString():null,notes:body.notes||null}).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path.startsWith("/api/admin/invoices/") && options.method==="PATCH"){
+    const id=path.split("/").pop(); const patch={};
+    if(body.status!==undefined) patch.status=body.status;
+    if(body.dueAt!==undefined) patch.due_at=body.dueAt||null;
+    if(body.notes!==undefined) patch.notes=body.notes||null;
+    if(body.status==="issued") patch.issued_at=new Date().toISOString();
+    if(body.status==="paid") patch.paid_at=new Date().toISOString();
+    const {data,error}=await supabase.from("invoices").update(patch).eq("id",id).eq("organization_id",organizationId).select().single();
+    if(error) throw error; return {data};
+  }
+  if(path==="/api/admin/invoice-payments" && !options.method){
+    const {data,error}=await supabase.from("invoice_payments").select("*,invoices(invoice_number)").eq("organization_id",organizationId).order("paid_at",{ascending:false});
+    if(error) throw error;
+    return {data:(data||[]).map(x=>({...x,invoice_number:x.invoices?.invoice_number||"—"}))};
+  }
+  if(path==="/api/admin/invoice-payments" && options.method==="POST"){
+    const amount=Number(body.amount); if(!Number.isFinite(amount)||amount<=0) throw new Error("Jumlah pembayaran tidak valid.");
+    const user=(await supabase.auth.getUser()).data.user;
+    const {data:payment,error}=await supabase.from("invoice_payments").insert({organization_id:organizationId,invoice_id:body.invoiceId,payment_number:body.paymentNumber,paid_at:body.paidAt||new Date().toISOString(),amount,method:body.method||"cash",reference:body.reference||null,notes:body.notes||null,created_by:user?.id||null}).select().single();
+    if(error) throw error;
+    const {data:inv,error:invError}=await supabase.from("invoices").select("id,total_amount").eq("id",body.invoiceId).eq("organization_id",organizationId).single();
+    if(invError) throw invError;
+    const {data:payments,error:sumError}=await supabase.from("invoice_payments").select("amount").eq("invoice_id",body.invoiceId).eq("organization_id",organizationId);
+    if(sumError) throw sumError;
+    const paid=(payments||[]).reduce((s,x)=>s+Number(x.amount||0),0);
+    const nextStatus=paid>=Number(inv.total_amount||0)?"paid":"issued";
+    await supabase.from("invoices").update({status:nextStatus,paid_at:nextStatus==="paid"?new Date().toISOString():null}).eq("id",inv.id).eq("organization_id",organizationId);
+    return {data:payment,paid,invoiceStatus:nextStatus};
+  }
   if(path==="/api/admin/vendor-invoices" && !options.method){
     const {data,error}=await supabase.from("vendor_invoices").select("*,suppliers(name,supplier_code),purchase_orders(order_number),goods_receipts(receipt_number)").eq("organization_id",organizationId).order("updated_at",{ascending:false});
     if(error) throw error; return {data:(data||[]).map(x=>({...x,supplier_name:x.suppliers?.name||"—",supplier_code:x.suppliers?.supplier_code||"—",order_number:x.purchase_orders?.order_number||"—",receipt_number:x.goods_receipts?.receipt_number||"—"}))};
