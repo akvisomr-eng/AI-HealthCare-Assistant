@@ -1,0 +1,54 @@
+name: Deploy Clinic API to Cloudflare Workers
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' && secrets.ADMIN_API_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Test backend
+        working-directory: backend
+        run: npm test
+      - name: Siapkan Wrangler
+        working-directory: backend
+        run: |
+          cat > wrangler.toml <<EOF
+          name = "sehatkita-clinic-api"
+          main = "worker.js"
+          compatibility_date = "2026-10-01"
+
+          [vars]
+          ALLOWED_ORIGIN = "https://akvisomr-eng.github.io"
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "sehatkita-clinic"
+          database_id = "${D1_DATABASE_ID}"
+          EOF
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+      - name: Deploy Worker dan migrasi D1
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_API_TOKEN: ${{ secrets.ADMIN_API_TOKEN }}
+        run: |
+          npx --yes wrangler@latest d1 execute sehatkita-clinic --remote --file=schema.sql
+          printf '%s' "$ADMIN_API_TOKEN" | npx --yes wrangler@latest secret put ADMIN_API_TOKEN
+          npx --yes wrangler@latest deploy
