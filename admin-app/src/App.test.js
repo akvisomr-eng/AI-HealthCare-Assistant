@@ -14,6 +14,17 @@ test("Admin Center menampilkan modul klinik", async () => {
   expect(screen.getByText("Manajemen Pasien")).toBeInTheDocument();
 });
 
+test("RME membuka workflow Encounter dan dapat kembali", async () => {
+  render(<App />);
+  fireEvent.click(await screen.findByRole("button",{name:/RME/}));
+  expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Buka modul →"}));
+  expect(screen.getByText("Ruang kerja modul")).toBeInTheDocument();
+  expect(screen.getByText("Encounter")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Kembali ke Rekam Medis Elektronik/}));
+  expect(screen.getByText("Rekam Medis Elektronik")).toBeInTheDocument();
+});
+
 test("Admin Center dapat membuka formulir pasien", async () => {
   render(<App />);
   fireEvent.click(await screen.findByText("+ Pasien Baru"));
