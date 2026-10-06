@@ -20,6 +20,11 @@ async function request(path,options={}){
     if(error) throw error;
     return {data:(data||[]).map(x=>({...x,patient_name:x.patients?.full_name||"Pasien"}))};
   }
+  if(path==="/api/admin/encounters" && !options.method){
+    const {data,error}=await supabase.from("encounters").select("*,patients(full_name,medical_record_number)").eq("organization_id",organizationId).order("started_at",{ascending:false});
+    if(error) throw error;
+    return {data:(data||[]).map(x=>({...x,patient_name:x.patients?.full_name||"Pasien",medical_record_number:x.patients?.medical_record_number||""}))};
+  }
   const body=options.body?JSON.parse(options.body):{};
   if(path==="/api/admin/patients" && options.method==="POST"){
     const {data,error}=await supabase.from("patients").insert({
@@ -29,6 +34,22 @@ async function request(path,options={}){
       gender:body.gender,
       birth_date:body.birthDate||null,
       phone:body.phone||null
+    }).select().single();
+    if(error) throw error;
+    return {data};
+  }
+  if(path==="/api/admin/encounters" && options.method==="POST"){
+    const {data,error}=await supabase.from("encounters").insert({
+      organization_id:organizationId,
+      patient_id:body.patientId,
+      appointment_id:body.appointmentId||null,
+      clinician_name:body.clinicianName,
+      started_at:body.startedAt||new Date().toISOString(),
+      status:body.status||"in_progress",
+      subjective:body.subjective||null,
+      objective:body.objective||null,
+      assessment:body.assessment||null,
+      plan:body.plan||null
     }).select().single();
     if(error) throw error;
     return {data};
