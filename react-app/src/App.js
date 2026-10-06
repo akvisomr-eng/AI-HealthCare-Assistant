@@ -1,21 +1,66 @@
 import React, { useMemo, useState } from "react";
 import "./index.css";
 
-const gejala = ["demam", "batuk", "sesak", "nyeri dada", "sakit kepala", "mual", "muntah", "diare", "pusing", "lemas"];
+const kelompokGejala = [
+  { nama: "demam", pola: ["demam", "badan panas", "badan terasa panas", "suhu tubuh naik", "suhu badan naik", "panas tinggi"] },
+  { nama: "batuk", pola: ["batuk", "batuk-batuk", "batuk batuk"] },
+  { nama: "sesak", pola: ["sesak", "sulit bernapas", "susah bernapas", "sulit bernafas", "susah bernafas", "napas terasa berat", "nafas terasa berat", "napas berat", "nafas berat"] },
+  { nama: "nyeri dada", pola: ["nyeri dada", "sakit dada", "dada sakit", "dada terasa sakit", "dada terasa ditekan", "tekanan di dada"] },
+  { nama: "sakit kepala", pola: ["sakit kepala", "kepala sakit", "kepala terasa sakit", "pusing di kepala"] },
+  { nama: "mual", pola: ["mual", "ingin muntah", "rasa mual"] },
+  { nama: "muntah", pola: ["muntah", "muntah-muntah", "muntah muntah"] },
+  { nama: "diare", pola: ["diare", "mencret", "buang air besar cair", "bab cair", "berak cair"] },
+  { nama: "pusing", pola: ["pusing", "kepala berkunang", "berkunang-kunang", "berkunang kunang", "terasa berputar"] },
+  { nama: "lemas", pola: ["lemas", "badan lemas", "tidak bertenaga", "kurang tenaga", "badan terasa lemah"] }
+];
+
+const tandaBahaya = [
+  "sesak berat", "sangat sulit bernapas", "tidak bisa bernapas", "napas sangat berat",
+  "nafas sangat berat", "nyeri dada hebat", "sakit dada hebat", "dada terasa sangat tertekan",
+  "pingsan", "hilang kesadaran", "tidak sadarkan diri", "kejang", "perdarahan hebat",
+  "darah keluar banyak", "pendarahan hebat"
+];
+
+const normalisasi = (nilai) => nilai
+  .toLowerCase()
+  .replace(/[.,!?;:()]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const analisisKeluhan = (nilai) => {
+  const teks = normalisasi(nilai);
+  if (!teks) return null;
+
+  const darurat = tandaBahaya.some(frasa => teks.includes(frasa));
+  const cocok = kelompokGejala
+    .filter(kelompok => kelompok.pola.some(frasa => teks.includes(frasa)))
+    .map(kelompok => kelompok.nama);
+
+  if (darurat) {
+    return {
+      level: "Darurat",
+      warna: "merah",
+      teks: "Keluhan yang Anda masukkan memiliki tanda bahaya yang dapat memerlukan pertolongan segera. Hubungi layanan darurat setempat atau pergi ke fasilitas kesehatan terdekat.",
+      gejala: cocok
+    };
+  }
+
+  return {
+    level: cocok.length >= 2 ? "Perlu diperiksa" : "Pantau dan konsultasikan",
+    warna: cocok.length >= 2 ? "kuning" : "hijau",
+    teks: cocok.length >= 2
+      ? "Beberapa keluhan terdeteksi. Pertimbangkan berkonsultasi dengan tenaga kesehatan, terutama bila keluhan memburuk atau menetap."
+      : "Informasi belum cukup untuk menilai keluhan. Pantau kondisi dan konsultasikan dengan tenaga kesehatan bila Anda khawatir.",
+    gejala: cocok
+  };
+};
 
 function App() {
   const [tab, setTab] = useState("beranda");
   const [keluhan, setKeluhan] = useState("");
   const [hasil, setHasil] = useState(null);
 
-  const saran = useMemo(() => {
-    const teks = keluhan.toLowerCase();
-    const darurat = ["sesak berat", "nyeri dada", "pingsan", "kejang", "perdarahan hebat"].some(x => teks.includes(x));
-    if (darurat) return { level: "Darurat", warna: "merah", teks: "Keluhan yang Anda masukkan dapat memerlukan pertolongan segera. Hubungi layanan darurat setempat atau pergi ke fasilitas kesehatan terdekat." };
-    if (!keluhan.trim()) return null;
-    const cocok = gejala.filter(x => teks.includes(x));
-    return { level: cocok.length >= 2 ? "Perlu diperiksa" : "Pantau dan konsultasikan", warna: cocok.length >= 2 ? "kuning" : "hijau", teks: cocok.length >= 2 ? "Beberapa gejala terdeteksi. Pertimbangkan berkonsultasi dengan tenaga kesehatan, terutama bila keluhan memburuk atau menetap." : "Informasi belum cukup untuk menilai keluhan. Pantau kondisi dan konsultasikan dengan tenaga kesehatan bila Anda khawatir." };
-  }, [keluhan]);
+  const saran = useMemo(() => analisisKeluhan(keluhan), [keluhan]);
 
   const buka = (nama) => {
     setTab(nama);
@@ -56,7 +101,7 @@ function App() {
             <p>Masukkan gejala secara singkat. Sistem ini hanya memberikan panduan awal dan bukan diagnosis medis.</p>
             <textarea value={keluhan} onChange={e => setKeluhan(e.target.value)} placeholder="Contoh: sejak kemarin saya demam dan batuk..." />
             <button type="button" className="primary large" onClick={() => setHasil(saran)}>Analisis Panduan</button>
-            {hasil && <div className={"result " + hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p><small>Jika kondisi terasa mengancam nyawa, jangan menunggu hasil aplikasi. Cari pertolongan medis segera.</small></div>}
+            {hasil && <div className={"result " + hasil.warna}><strong>{hasil.level}</strong><p>{hasil.teks}</p>{hasil.gejala?.length > 0 && <p><strong>Keluhan terdeteksi:</strong> {hasil.gejala.join(", ")}.</p>}<small>Jika kondisi terasa mengancam nyawa, jangan menunggu hasil aplikasi. Cari pertolongan medis segera.</small></div>}
             <button type="button" className="back" onClick={() => buka("beranda")}>← Kembali ke beranda</button>
           </section>
         </main>
